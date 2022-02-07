@@ -1002,15 +1002,6 @@ grid on;
 ylabel('SNR')
 title('Minstrel-HT')
 
-% plot(RAA);
-% stem(,'Marker','x');
-% if find(SPraa>0)
-%     stem(RAA,'x');
-% else
-%     stem(RAA,'-');
-% ,'X','MarkerIndices',1:find(SPraa>0):length(RAA)
-% end
-
 subplot(a,1,2);
 plot(RAA)
 hold on
@@ -1040,48 +1031,6 @@ grid on;
 xlim([0,numPackets])
 ylabel('PER')
 title('Packet errors')
-
-% f2 = figure;
-% stem(Srates,'LineStyle','none','MarkerEdgeColor','red','Marker','.')
-% grid on;
-% ylabel('MCS')
-% title('Sampled rates picked from Sample table')
-
-% grid on;
-% ylabel('MCS')
-% title('50ms time mark')
-
-% f4 = figure;
-% stem(SPFraa,'LineStyle','none','MarkerEdgeColor','black','Marker','o')
-% grid on;
-% ylabel('MCS')
-% title('Failed sampled rates')
-
-% f5 = figure;
-% stem(SPSraa,'LineStyle','none','MarkerEdgeColor','green','MarkerFaceColor','none','Marker','p')
-% grid on;
-% ylabel('MCS')
-% title('successfull sampled rates')
-
-% f6 = figure;
-% plot(RAA)
-% grid on;
-% ylabel('MCS')
-% title('Rate adaptation')
-
-% f7 = figure;
-% stem(plotNSP,'k','LineStyle',':','Marker','none')
-% grid on;
-% ylabel('MCS')
-% title('Non sampling period')
-% hold off
-
-% f8 = figure;
-% stem(SRates,'k','LineStyle','none','MarkerEdgeColor','magenta','MarkerFaceColor','magenta','Marker','s')
-% grid on;
-% ylabel('MCS')
-% title('MRR updates')
-
 end
 
 
