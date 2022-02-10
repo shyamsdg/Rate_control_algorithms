@@ -1,4 +1,4 @@
-%% 802.11n Minstrel-HT Rate Control Algorithm _ V2
+%% 802.11n Minstrel-HT Rate Control Algorithm
 % This example shows Minstrel-HT rate control by varying the Modulation and 
 % Coding scheme (MCS) of successive packets transmitted over a frequency selective 
 % multipath fading channel.
@@ -20,8 +20,6 @@
 % transmission completely fails (all retransmission attempts fail). The MRR chain 
 % is used to advise the hardware about which rate to use when retransmitting a 
 % frame.
-%
-% 
 %% The Minstrel-HT Algorithm
 % Minstrel-HT algorithms specifically used in 802.11n it adapts the data rate 
 % based on the statistical table of the results of the _Sampling period_ and _Non-Sampling 
@@ -125,13 +123,13 @@ prepkts = 20;  % not sampled continously for 20 packets
 notsam = 0;
 
 % Create sampleTable of 8*10 for GroupID-[1,L,20]
+previndx = 1;
+col = 1;
+SRatescol = 1;
 r = zeros(1,8);
 sampleTable = zeros(8,10);
 ST = SampleTable(r,sampleTable);
 initrates = ST.sampleTable(:,col);
-previndx = 1;
-col = 1;
-SRatescol = 1;
 
 % Select the Lowest MCSs in the table
 Maxtps = min(ST.sampleTable);
@@ -1002,6 +1000,15 @@ grid on;
 ylabel('SNR')
 title('Minstrel-HT')
 
+% plot(RAA);
+% stem(,'Marker','x');
+% if find(SPraa>0)
+%     stem(RAA,'x');
+% else
+%     stem(RAA,'-');
+% ,'X','MarkerIndices',1:find(SPraa>0):length(RAA)
+% end
+
 subplot(a,1,2);
 plot(RAA)
 hold on
@@ -1031,6 +1038,48 @@ grid on;
 xlim([0,numPackets])
 ylabel('PER')
 title('Packet errors')
+
+% f2 = figure;
+% stem(Srates,'LineStyle','none','MarkerEdgeColor','red','Marker','.')
+% grid on;
+% ylabel('MCS')
+% title('Sampled rates picked from Sample table')
+
+% grid on;
+% ylabel('MCS')
+% title('50ms time mark')
+
+% f4 = figure;
+% stem(SPFraa,'LineStyle','none','MarkerEdgeColor','black','Marker','o')
+% grid on;
+% ylabel('MCS')
+% title('Failed sampled rates')
+
+% f5 = figure;
+% stem(SPSraa,'LineStyle','none','MarkerEdgeColor','green','MarkerFaceColor','none','Marker','p')
+% grid on;
+% ylabel('MCS')
+% title('successfull sampled rates')
+
+% f6 = figure;
+% plot(RAA)
+% grid on;
+% ylabel('MCS')
+% title('Rate adaptation')
+
+% f7 = figure;
+% stem(plotNSP,'k','LineStyle',':','Marker','none')
+% grid on;
+% ylabel('MCS')
+% title('Non sampling period')
+% hold off
+
+% f8 = figure;
+% stem(SRates,'k','LineStyle','none','MarkerEdgeColor','magenta','MarkerFaceColor','magenta','Marker','s')
+% grid on;
+% ylabel('MCS')
+% title('MRR updates')
+
 end
 
 
@@ -1207,9 +1256,12 @@ end
 %% 
 % _Copyright 2021-2022, The IISc team:_ 
 % 
-% _*Researcher and Developer:* Shyam Sundar D G <shyamsdg01@gmail.com>_
+% *Researcher and Developer:* Shyam Sundar D G  <shyamsdg01@gmail.com shyamsdg01@gmail.com>
 % 
-% _*NS3 Collaborator:* Rushabha B <f20170220@pilani.bits-pilani.ac.in>_
+% *NS3 Collaborator:* Rushabha B <http://rush.balaji@gmail.com rush.balaji@gmail.com>
 % 
-% _*Technical Advisors:* Chandramani Singh <chandra@iisc.ac.in> and Neeleshb 
-% Mehta <nbmehta@iisc.ac.in>_
+% *Technical Advisors:* _Neeleshb Mehta_ <nbmehta@iisc.ac.in _nbmehta@iisc.ac.in_> 
+% _and_ Chandramani Singh <chandra@iisc.ac.in chandra@iisc.ac.in>
+% 
+% _The authors would like to thank *Aerospace Network Research Consortium(*_<http://www.anrc.us/ 
+% ANRC>_*),*_ <https://iisc.ac.in/ IISc> _for thier support._
