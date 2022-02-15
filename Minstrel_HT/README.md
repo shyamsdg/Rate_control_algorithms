@@ -7,8 +7,7 @@ This folder contains the following files:
 1. `htNoiseEstimate.m`:
 ### Source code and inspiration
 
-MATLAB code for the Minstrel-HT algorithm was written keeping the NS3 version in mind. The NS3 version was used to debug and calibarate the performance of the algorithm.
-The NS3 version can be found [here](https://www.nsnam.org/doxygen/classns3_1_1_minstrel_ht_wifi_manager.html). 
+MATLAB code for the Minstrel-HT algorithm was written, keeping the NS3 version of Minstrel-HT in mind. The NS3 version was used to debug and calibarate the performance of the algorithm, and can be found [here](https://www.nsnam.org/doxygen/classns3_1_1_minstrel_ht_wifi_manager.html). 
 
 
    
