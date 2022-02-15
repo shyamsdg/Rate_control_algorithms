@@ -1,5 +1,6 @@
 # Rate_control_algorithm
 Author: Shyam Sundar
+
 Rate control/adaptation algorithms determine the performance of Wi-Fi networks, depending on the network conditions, the rate changes to achieve better Throughput (TP).
 
 There are many external factors that affect the TP of the wireless networks: 
