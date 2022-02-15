@@ -1,12 +1,14 @@
 # Overview
-    Minstrel(nonHT) is a rate control algorithm implemented in MadWifi and Linux. 
+This folder contains the following files:
+1. Minstrel HT_NS3_FV.pdf: Complete overview of the Minstrel-HT algorithm is given in the form of a flowchart.
+1. `MinstrelHT_Live_Script.mlx`: MATLAB live editor version of the Minstrel-HT algorithm. Implemented in this format for easier understanding of different blocks of the algorithm. 
+1. `MinstrelHT_Matlab_Code.m`: Mintrel-HT algorithm in MATLAB script file. Run this for performance evaluation of the algorithm.
+1. `helperFrequencyOffset.m`:
+1. `htNoiseEstimate.m`:
+### Source code and inspiration
 
-    The basic principle is to probe the environment and adapt the rate based on statistics collected on the probability of successful transmission. The algorithm adapts the rate to the highest rate that it considers successful, and spends a fraction of its time doing 'look around' by trying other rates. 
+MATLAB code for the Minstrel-HT algorithm was written keeping the NS3 version in mind. The NS3 version was used to debug and calibarate the performance of the algorithm.
+The NS3 version can be found [here](https://www.nsnam.org/doxygen/classns3_1_1_minstrel_ht_wifi_manager.html). 
 
-    Minstrel(nonHT) is appropriate for non-HT configurations; for HT (i.e. 802.11n or higher), users should use Minstrel-HT. Minstrel(nonHT) will error exit if the user tries to configure it with a Wi-Fi MAC that supports 802.11n or higher.
 
-# About this code
-    This Matlab code executes the Minstrel-HT algorithm, where NS3-MinstrelHTWifimanager was used to decode, calibrate and implement in Matlab.
-
-# More Information
-    Attached a detailed Flowchart in PDF format in Github; The comments in the code explains the detailed implementation of the algorithm, use Live Script for easier understanding.
+   
