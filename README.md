@@ -1,8 +1,11 @@
 # Rate_control_algorithm
     Author: Shyam Sundar
-    Rate control/adaptation algorithms determine the performance of Wi-Fi networks, depending on the network conditions, the rate changes to achieve better Throughput (TP).
-    There are many external factors that affect the TP of the wireless networks: Traffic congestion, dynamic nature, and receiver compatibility. 
-    Therefore, rate adaptation is one of the fundamental resource management issues which are used to deal with channel dynamicity.
+    Rate control/adaptation algorithms determine the performance of Wi-Fi networks, 
+    depending on the network conditions, the rate changes to achieve better Throughput (TP).
+    There are many external factors that affect the TP of the wireless networks: 
+    Traffic congestion, dynamic nature, and receiver compatibility. 
+    Therefore, rate adaptation is one of the fundamental resource management 
+    issues which are used to deal with channel dynamicity.
 
 ## Running the code
     There is a MATLAB code and its corresponding live editor code which are tested and evaluated. 
