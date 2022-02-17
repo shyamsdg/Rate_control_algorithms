@@ -21,8 +21,7 @@ Below are the required dependencies to run the code:
 # Authors
 The research team comprising of the members from Indian Institute of Science (IISc), listed below, has developed the Ideal and Minstrel-HT Rate adaptation algorithms and their implementation in MATLAB.
 
-Researcher and Developer: Shyam Sundar D G (shyamsdg01@gmail.com)
-NS3 Collaborator: Rushabha B (rushab.balaji@gmail.com)
-Technical Advisors: Prof.Neelesh B Mehta (nbmehta@iisc.ac.in) and Dr.Chandramani Singh (chandra@iisc.ac.in)
+Researcher and Developer: Shyam Sundar D G (shyamsdg01@gmail.com)<br/>NS3 Collaborator: Rushabha B (rushab.balaji@gmail.com) 
+<br/>Technical Advisors: Prof.Neelesh B Mehta (nbmehta@iisc.ac.in) and Dr.Chandramani Singh (chandra@iisc.ac.in)
 
 The authors would like to thank Aerospace Network Research Consortium (ANRC), IISc for thier support.
