@@ -18,7 +18,12 @@ Below are the required dependencies to run the code:
 1. MATLAB
 2. WLAN toolbox
 
-# Authors
+# Contributing
+1. Fork the repo to your account and Clone the repo and create a new branch (not to affect main)
+2. Make changes to code and test
+3. Submit pull request with comprehensive description of changes
+
+# The team
 The research team comprising of the members from Indian Institute of Science (IISc), listed below, has developed the Ideal and Minstrel-HT Rate adaptation algorithms and their implementation in MATLAB.
 
 Researcher and Developer: Shyam Sundar D G (shyamsdg01@gmail.com)<br/>NS3 Collaborator: Rushabha B (rushab.balaji@gmail.com) 

@@ -26,9 +26,4 @@ Our Minstrel-HT algorithm implementation in MATLAB is inspired from NS3-Minstrel
 
 The NS3 source code can be found [here](https://www.nsnam.org/doxygen/classns3_1_1_minstrel_ht_wifi_manager.html). 
 
-## Contributing
-    1. Clone repo and create a new branch
-    2. Make changes and test
-    3. Submit pull request with comprehensive description of changes
-
    

@@ -16,8 +16,3 @@ The folder contains the following files:
 
 # More Information
 The comments in the code explains the detailed implementation of the algorithm, use Live Script for easier understanding.
-
-## Contributing
-    1. Clone repo and create a new branch
-    2. Make changes and test
-    3. Submit pull request with comprehensive description of changes

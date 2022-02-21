@@ -1,77 +1,84 @@
 %% 802.11n Minstrel-HT Rate Control Algorithm
-% This example shows Minstrel-HT rate control by varying the Modulation and 
-% Coding scheme (MCS) of successive packets transmitted over a frequency selective 
-% multipath fading channel.
+% This example shows Minstrel-HT rate control algorithm (RCA)  by varying the 
+% Modulation and Coding scheme (MCS) of successive packets transmitted over a 
+% frequency selective multipath fading channel.
 %% Introduction
-% The IEEE® 802.11™ standard supports Minstrel-HT rate control by adjusting 
-% the MCS value of each transmitted packet based on the underlying radio propagation 
-% channel. Maximizing link throughput, in a propagation channel that is time varying 
-% due to multipath fading or movement of the surrounding objects, requires dynamic 
-% variation of MCS. The IEEE 802.11 standard does not define any standardized 
-% rate control algorithm (RCA) for dynamically varying the modulation rate. The 
-% implementation of RCA is left open to the WLAN device manufacturers. This example 
-% uses a open-loop rate control scheme. The algorithm is based on MinstrelHtWifimanager 
-% from NS3. Minstrel-HT is a rate adaptation mechanism for the 802.11n/ac/ax standards 
-% based on Minstrel-nonHT, and is based on the approach of probing the channel 
-% to dynamically learn about working rates that can be supported. Minstrel-HT 
-% is designed for high-latency devices that implement a Multiple Rate Retry (MRR) 
-% chain. This kind of device does not give feedback for every frame retransmission, 
-% but only when a frame was correctly transmitted (an Ack is received) or a frame 
-% transmission completely fails (all retransmission attempts fail). The MRR chain 
-% is used to advise the hardware about which rate to use when retransmitting a 
-% frame.
-%% The Minstrel-HT Algorithm
-% Minstrel-HT algorithms specifically used in 802.11n it adapts the data rate 
-% based on the statistical table of the results of the _Sampling period_ and _Non-Sampling 
-% period_. Minstrel-HT is made for the use of data rate based on 20/40 MHz bandwidth, 
-% LGI/SGI and the number of spatial streams can be adapted to channel conditions. 
-% The number of group rate is determined by the number of spatial streams, the 
-% duration of the GI and the size of the bandwidth used.
-% Initialize all HT Groups
-% Minstrel-HT begins with the initialization of the HT data rate group. Initialization 
-% HT data rate group performed to identify the data rate group is supported by 
-% transmitter and is based on the number of streams, GI and bandwidth. For each 
-% group, a flag indicates if the group is supported by the station. Different 
-% stations communicating with an AP can have different capabilities. In the example 
-% below the station only supports 1 spatial stream, Long GI and a Bandwidth of 
-% 20MHz, the group is named as Group-[1,L,20].
-% Initialize Sample Table
-% Then Initializing of Sample Table for the initiation of sampling rate is created 
-% based on the generation of uniform random number generator.
-% MRR table update
-% MRR table update is repeated within a period of 50 ms. In each MRR table update, 
-% throughput and EWMA is updated for each rate in each group. Throughput is calculated 
-% with the following provisions:
-% 
-% If the EWMA probability < 10 then the throughput assumed to be zero. If the 
-% EWMA probability > 90 then the throughput is calculated based on the equation 
-% (throughput = 90/txTime). For EWMA probability 10 ≤ ewmaProb ≤ 90 then throughput 
-% = ewmaProb/txTime. ewmaProb and throughput is calculated for all the sampling 
-% rates and MRR updates at this period. 
-% 
-% Then the algorithm determines the new max_tp, max_tp2 and max_prob creatibng 
-% a table. The new max_tp is the rate that has the highest throughput. The New 
-% max_tp2 is who has the second highest throughput. The new max_prob is a sample 
-% rate that has the highest EWMA probability. 
-% Non-Sampling Period
-% These rates are only used when an entire packet fails and is retried(C1,C2 
-% and C3 times respectively) in _Non-Sampling Period_.
+% The IEEE® 802.11™ standard does not define any standardized RCA  for dynamically 
+% varying the modulation rate. The implementation of RCA is left open to the Wireless 
+% Local Area Network (WLAN) device manufacturers. These algorithms help in dynamically 
+% selecting the MCS for a packet, as the channel conditions vary over time. The 
+% IEEE 802.11n standard supports Minstrel-HT rate control by adjusting the MCS 
+% value of each transmitted packet based on the underlying radio propagation channel. 
+% This algorithm is a open-loop based rate control scheme (i.e. there is no feedback 
+% from the reciever to transmitter). In Minstrel-HT, the selection of the MCS 
+% value is based on the statistics of the data collected, and obtained by periodically 
+% probing the channel. 
+%% Minstrel-HT Algorithm
+% Minstrel-HT algorithm is specifically used in 802.11n, it adapts the rate 
+% based on two time periods defined in the algorithm which determine how the algorithm 
+% behaves. The first is the _sampling period_ during which the exploration of 
+% new rates is done. Second, is the _non-sampling period_, where only Multi-Rate 
+% Retry (MRR) table is used to transmit the packets. The number of rates, Minstrel-HT 
+% can choose is determined by the followng parameters: 
+%% 
+% # Channel bandwidth: 20/40 MHz 
+% # Gaurd interval (GI): Long GI/Short GI
+% # Number of spatial streams: 1/2/3/4
+%% 
+% The block diagram below depicts how the algorithm works briefly. For a detailed 
+% algorithm, flowchart (named as MinstrelHT_Detailed_Flowchart) of the algorithm 
+% is attached in PDF format and can be found in this <https://github.com/shyamsdg/Rate_control_algo/tree/main/Minstrel_HT 
+% link>.
+% Initialization
+% Every combination of the above parameters forms a unique group, and each group 
+% consists of 8 rates. For each group, a flag is used to indicate if the group 
+% is supported by the station or not. Different stations communicating with the 
+% access point (AP) can support different groups. In our example, the station 
+% only supports 1 spatial stream, Long GI and a channel bandwidth of 20MHz. The 
+% group is denoted by the code [1,L,20].
+% Initialize Sample table
+% The sampling table conists of 8*10 vector, where each coloumn corresponds 
+% to group which is supported by the user. If the number of groups supported by 
+% the station is less than 10, then the group repeats from the 11th column. Each 
+% column consists of the corresponding rates of that group, however the rates 
+% are randomly generated but unique in each column. This table is used during 
+% _Sampling period._
 % Sampling period 
-% In _Sampling period_, the Sampling rate that results in the highest throughput 
-% and highest probability of successful delivery of the packet and also not part 
-% of the MRR table is used as the data rate for the next packet delivery, sampling 
-% is done on all the existing rate in each group rate. The detailed flowchart 
-% of the algorithm is attached as PDF, this figure briefly explains the Minstrel-HT.
+% In _Sampling period_, a rate is selected from the sampling table which is 
+% called as sampling rate. The Sampling rate that results in the highest throughput, 
+% highest probability of successful delivery of the packet and not part of the 
+% MRR table is used as the data rate for the next packet delivery, else MRR table 
+% is used for transmission unless the above conditions are satisfied when a sampling 
+% rate is selected from the sampling table.
+% MRR table
+% This table consists of three rates MaxTP, MaxTP2 and MaxProb. These rates 
+% are ranked based on  throughput calculated and exponentailly weighted moving 
+% average (EWMA) updates for each rate. 
+% 
+% The MaxTP is the rate that has the highest throughput. The MaxTP2 is the rate 
+% that has the second highest throughput. The MaxProb is a sample rate that has 
+% the highest EWMA probability.
+% MRR table update
+% MRR table update is repeated within a period of 50 ms. During each update, 
+% throughput and EWMA is updated for each rate in each group. Before every MRR 
+% update the rates in the MRR table are reset to lowest rates and then the MRR 
+% table gets updated based on the statistics.
+% Non-Sampling Period
+% In _Non-sampling period,_ the rates in the MRR table are used for transmission.
+% 
+% *Note*: Sampling phase is the first sampling period at the start of the algorithm, 
+% where three rates are sampled and updated in the MRR table.
 % 
 % 
-%% Matlab Implementation
+%% MATLAB Implementation
 % In this example, an 802.11n HT waveform consisting of a single HT format packet 
 % is generated using the <https://in.mathworks.com/help/wlan/ref/wlanwaveformgenerator.html 
 % |wlanWaveformGenerator|> function. The waveform is passed through a TGn channel 
 % and noise is added. The packet is synchronized and decoded to recover the PSDU. 
-% Then Frame Success Ratio(FSR) is calculated and based on FSR the algorithm fills 
-% the MRR table during the Sampling phase and later enters into alternate _Non-Sampling 
-% period_ and _Sampling period_. This figure shows the processing for each packet.
+% Then Frame Success Ratio (FSR) is calculated and based on FSR the algorithm 
+% fills the MRR table during the Sampling phase and later enters into alternate 
+% _Non-Sampling period_ and _Sampling period_. This figure shows the processing 
+% for each packet.
 % 
 % 
 %% Waveform Configuration
@@ -106,7 +113,8 @@ samplingrate = wlanSampleRate(cfgHT);
 tgnChannel.SampleRate = samplingrate;
 %% Rate Control Algorithm Parameters
 % Typically RCAs use channel quality or link performance metrics, such as SNR, 
-% packet error rate or frame success ratio(FSR), for rate selection. --- .
+% packet error rate or frame success ratio(FSR), for rate selection. The RCA presented 
+% in this example uses FSR based EWMA and TP calculation.
 
 % Packets and SNR variations
 Sphase = 5; % There has to be 4 rates sampled based on NS3
@@ -139,7 +147,7 @@ R1 = Maxtps(1,1);
 
 % Transmission time of each MCS/Rate
 
-% Long Guard Interval packet time calculated using MCS index table
+% Long Guard Interval packet time calculated using MCS index tableintiia
 bytetimeperMCS = [0.00015*10^(-3) 0.00007*10^(-3) 0.000051*10^(-3) 0.000038*10^(-3) 0.000025*10^(-3) 0.000019*10^(-3) 0.000017*10^(-3) 0.000015*10^(-3)];
 
 % Short Guard Interval packet time calculated using MCS index table
@@ -258,7 +266,9 @@ for numPkt = 1:numPackets
         
         snr = snrWalk; %#ok<UNRCH>
     end
-%% FIRST PACKET WITH LOWEST MCS
+% FIRST PACKET TRANSMISSION WITH LOWEST MCS
+% The start of the algorithm uses the lowest MCS in the group and transmits 
+% the first packet.
 
     if numPkt == 1
         rate = R1; % R1 is the lowest MCS in the group
@@ -311,21 +321,23 @@ for numPkt = 1:numPackets
                     EWMA(numPkt) = NaN;
                 end
                 
-                % Displaying in command window for debugging
-                disp(['P ' num2str(numPkt)]);
-                disp(['MCS:' num2str(rate)]);
-                disp(['tempProb:' num2str(tempProb(row,numPkt))]);
-                disp(['tppmcs:' num2str(tppmcs(row,numPkt))]);
-                disp(['EWMAprob:' num2str(EWMAprob(row,numPkt))]);
-                disp(['txntime:' num2str(txntime(numPkt))]);
+                % Display in command window for debugging the code
+%                 disp(['P ' num2str(numPkt)]);
+%                 disp(['MCS:' num2str(rate)]);
+%                 disp(['tempProb:' num2str(tempProb(row,numPkt))]);
+%                 disp(['tppmcs:' num2str(tppmcs(row,numPkt))]);
+%                 disp(['EWMAprob:' num2str(EWMAprob(row,numPkt))]);
+%                 disp(['txntime:' num2str(txntime(numPkt))]);
             end
         end
         txntime(numPkt) = 0;
         RCP = false;
         
     else
-%% SAMPLING/TRAINING PHASE
-% This phase is required to fill the MRR table
+% Sampling Phase
+% Sampling phase is the first sampling period at the start of the algorithm, 
+% where three rates from sample table are transmitted to fill the MRR table and 
+% next the algorithm enters into alternate _Non-sampling_ and _Sampling period_.
 
         if numPkt <= Sphase
             
@@ -334,14 +346,15 @@ for numPkt = 1:numPackets
             
             % Select sampled rate from the sample table
             rate = ST.sampleTable(previndx);
-            disp(['Next index of sample table:' num2str(previndx)]);
-            disp(['Sampled Rate:' num2str(sprate)]);
             
             % Display the sampling phase parameters
-            disp('----------------------------------');
-            disp('Sampling phase');
-            disp(['P ' num2str(numPkt)]);
-            disp(['MCS:' num2str(rate)]);
+%             disp(['Next index of sample table:' num2str(previndx)]);
+%             disp(['Sampled Rate:' num2str(sprate)]);
+%             disp('----------------------------------');
+%             disp('Sampling phase');
+%             disp(['P ' num2str(numPkt)]);
+%             disp(['MCS:' num2str(rate)]);
+            
             Srates(numPkt) = rate;
             
             RAA(numPkt) = rate; % Log rates for plotting
@@ -388,7 +401,7 @@ for numPkt = 1:numPackets
                         EWMAprob(row,numPkt) = (tempProb(row,numPkt));
                     end
                     
-                    % Get TP score
+                    % Calculate TP
                     if EWMAprob(row,numPkt)<10
                         TPscore(row,numPkt)=0;
                     elseif EWMAprob(row,numPkt)>90
@@ -403,11 +416,12 @@ for numPkt = 1:numPackets
                         EWMA(numPkt) = NaN;
                     end
                     
-                    disp(['tempProb:' num2str(tempProb(row,numPkt))]);
-                    disp(['tppmcs:' num2str(tppmcs(row,numPkt))]);
-                    disp(['EWMAprob:' num2str(EWMAprob(row,numPkt))]);
-                    disp(['txntime:' num2str(txntime(numPkt))]);
-                    disp(['Previous index of samp table:' num2str(previndx)]);
+                    % Display the sampling phase parameters
+%                     disp(['tempProb:' num2str(tempProb(row,numPkt))]);
+%                     disp(['tppmcs:' num2str(tppmcs(row,numPkt))]);
+%                     disp(['EWMAprob:' num2str(EWMAprob(row,numPkt))]);
+%                     disp(['txntime:' num2str(txntime(numPkt))]);
+%                     disp(['Previous index of samp table:' num2str(previndx)]);
                     
                     % Select BestTP as the next MCS for NSP
                     rate = rankrate.BestTP;
@@ -430,28 +444,39 @@ for numPkt = 1:numPackets
             
             if (numPkt == Sphase) % enter into NSP for the next packet
                 RCP = true;
-                disp(['RCP is true:' num2str(RCP)]);
+%                 disp(['RCP is true:' num2str(RCP)]);
             end
         else
 %% NON SAMPLING PERIOD
+% During _Non-sampling period_ the rates in MRR table are used to transmit for 
+% 18 packets. Initially during this period MaxTP is transmitted, when the packet 
+% transmitting with MaxTP fails then it is retried for C1 times. If MaxTP fails 
+% continuously for C1 times, then MaxTP2 is transmitted, and when the packet transmitting 
+% with MaxTP fails then it is retried for C2 times. If MaxTP2 fails continuously 
+% for C2 times, then MaxProb is transmitted, when the packet transmitting with 
+% MaxProb fails then it is retried for C3 times. If all the three rates (MaxTP, 
+% MaxTP2 and MaxProb) has failed one after the other for C1, C2 and C3 times respectively, 
+% then the lowest rate in the group is used to transmit in the remaining Non-sampling 
+% period.
 
             if RCP
                 
-                disp('----------------------------------');
-                disp('Enter NSP');                        %
-                disp('|');
-                disp(['P ' num2str(numPkt)]);
+                % Display the parameters for debugging
+%                 disp('----------------------------------');
+%                 disp('Enter NSP');                        
+%                 disp('|');
+%                 disp(['P ' num2str(numPkt)]);
                                 
                 if NSPpkts <= nonSampPeriod
                     
-                    disp(['MCS :' num2str(rate)]);
-                    disp(['Non sampling period packet:' num2str(NSPpkts)]);
+%                     disp(['MCS :' num2str(rate)]);
+%                     disp(['Non sampling period packet:' num2str(NSPpkts)]);
                     Srates(numPkt) = NaN; % To plot sampled rates
                     
                     % Processing of packets in NSP
                     TxRxNSP = TxRxchain(rate,snr,tgnChannel,cfgHT);
                     RAA(numPkt) = TxRxNSP.RAA;
-                    disp(['MCS for plot after recieve chain:' num2str(TxRxNSP.RAA)]);
+%                     disp(['MCS for plot after recieve chain:' num2str(TxRxNSP.RAA)]);
                     
                     % Calculate packet error rate (PER)
                     if isempty(TxRxNSP.RxPSDU)
@@ -503,11 +528,11 @@ for numPkt = 1:numPackets
                                 TPscore(row,numPkt) = EWMAprob(row,numPkt)/txntime(numPkt);
                             end
                             
-                            disp(['tempProb:' num2str(tempProb(row,numPkt))]);
-                            disp(['tppmcs:' num2str(tppmcs(row,numPkt))]);
-                            disp(['EWMAprob:' num2str(EWMAprob(row,numPkt))]);
-                            disp(['txntime:' num2str(txntime(numPkt))]);
-                            disp(['Previous index of samp table:' num2str(previndx)]);
+%                             disp(['tempProb:' num2str(tempProb(row,numPkt))]);
+%                             disp(['tppmcs:' num2str(tppmcs(row,numPkt))]);
+%                             disp(['EWMAprob:' num2str(EWMAprob(row,numPkt))]);
+%                             disp(['txntime:' num2str(txntime(numPkt))]);
+%                             disp(['Previous index of samp table:' num2str(previndx)]);
                             
                             % Select BestTP as the next MCS for NSP
                             rate = rankrate.BestTP;
@@ -516,7 +541,7 @@ for numPkt = 1:numPackets
                     
                     % if Packet fails; MRR chain
                     if any(nbiterr(numPkt))
-                        disp(['Unsucessfull NSP:' num2str(numPkt)]);
+%                         disp(['Unsucessfull NSP:' num2str(numPkt)]);
                         
                         % MULTI-RATE RETRY CHAIN
                         for temp = 1:8
@@ -529,17 +554,17 @@ for numPkt = 1:numPackets
                                     C1 = C1+1;
                                     C1txntime = C1 * MRRtxtime;
                                     
-                                    disp(['tx1:' num2str(MRRtxtime)]);
-                                    disp(['C1:' num2str(C1txntime)]);
+%                                     disp(['tx1:' num2str(MRRtxtime)]);
+%                                     disp(['C1:' num2str(C1txntime)]);
                                     
                                     if C1txntime >= 0.004
                                         RC = rankrate.NextBestTP;
-                                        disp(['Best TP failed so NextBestTP:' num2str(RC)]);
+%                                         disp(['Best TP failed so NextBestTP:' num2str(RC)]);
                                         rate = RC;
                                         break;
                                     else
                                         RC = rankrate.BestTP;
-                                        disp(['Re-transmit BestTP:' num2str(RC)]);
+%                                         disp(['Re-transmit BestTP:' num2str(RC)]);
                                         rate = RC;
                                         break;
                                     end
@@ -550,17 +575,17 @@ for numPkt = 1:numPackets
                                     C2 = C2+1;
                                     C2txntime = C2 * MRRtxtime;
                                     
-                                    disp(['tx2:' num2str(MRRtxtime)]);
-                                    disp(['C2:' num2str(C2txntime)]);
+%                                     disp(['tx2:' num2str(MRRtxtime)]);
+%                                     disp(['C2:' num2str(C2txntime)]);
                                     
                                     if C2txntime >= 0.004
                                         RC = rankrate.BestProb;
-                                        disp(['NextBestTP failed so BestProb:' num2str(RC)]);
+%                                         disp(['NextBestTP failed so BestProb:' num2str(RC)]);
                                         rate = RC;
                                         break;
                                     else
                                         RC = rankrate.NextBestTP;
-                                        disp(['Re-transmit NextBestTP:' num2str(RC)]);
+%                                         disp(['Re-transmit NextBestTP:' num2str(RC)]);
                                         rate = RC;
                                         break;
                                     end
@@ -571,17 +596,17 @@ for numPkt = 1:numPackets
                                     C3 = C3+1;
                                     C3txntime = C3 * MRRtxtime;
                                     
-                                    disp(['tx3:' num2str(MRRtxtime)]);
-                                    disp(['C3:' num2str(C3txntime)]);
+%                                     disp(['tx3:' num2str(MRRtxtime)]);
+%                                     disp(['C3:' num2str(C3txntime)]);
                                     
                                     if C3txntime >= 0.004
                                         RC = R1;
-                                        disp(['BestProb failed so Lowest rate:' num2str(RC)]);
+%                                         disp(['BestProb failed so Lowest rate:' num2str(RC)]);
                                         rate = RC;
                                         break;
                                     else
                                         RC = rankrate.BestProb;
-                                        disp(['Re-transmit BestProb:' num2str(RC)]);
+%                                         disp(['Re-transmit BestProb:' num2str(RC)]);
                                         rate = RC;
                                         break;
                                     end
@@ -590,7 +615,7 @@ for numPkt = 1:numPackets
                         end
                         
                     else % packet successfull
-                        disp(['sucessfull NSP:' num2str(numPkt)]);
+%                         disp(['sucessfull NSP:' num2str(numPkt)]);
                         rate = RC;
                         C1 = 0;
                         C2 = 0;
@@ -612,7 +637,7 @@ for numPkt = 1:numPackets
                                 mrrUpdate(numPkt) = 8;
                                 SRatescol = SRatescol + 1;
                                 MRRtxntime = sum(txntime);
-                                disp(['MRRtxntime' num2str(MRRtxntime)]);
+%                                 disp(['MRRtxntime' num2str(MRRtxntime)]);
                                 totaltxtime = totaltxtime+intervalTime;
                                 rankrate = ArrangeMCS(Maxtps,tp);
                                 SRates(:,SRatescol) = rankrate.MRR;
@@ -622,9 +647,9 @@ for numPkt = 1:numPackets
                     
                     % Count the number of non sampling packets
                     if NSPpkts > nonSampPeriod
-                        disp('End of NSP'); %num2str(NSPpkts)]);
+%                         disp('End of NSP'); %num2str(NSPpkts)]);
                         RCP = false;
-                        disp(['Switch to SP:' num2str(RCP)]);
+%                         disp(['Switch to SP:' num2str(RCP)]);
                         SPMRR = rankrate.BestTP; %Sampling period MRR initialiing
                         NSPpkts = 1;
                         plotNSP(numPkt) = 7;
@@ -632,11 +657,19 @@ for numPkt = 1:numPackets
                 end
             elseif ~RCP
 %% SAMPLING PERIOD
+% In _Sampling period_, a rate is selected from the sampling table. The selected 
+% rate from sampling table is called as sampling rate and is used as the data 
+% rate for the next packet delivery only when it has the highest throughput, highest 
+% probability of successful delivery of the packet and also which is not part 
+% of the MRR table. If these conditions does not satisfy, then instead of Sampling 
+% rate, the MRR table is used and the next incremented sampled rate from sample 
+% table is checked with the conditions till a sampled rate from sampling table 
+% satisfies the above conditions.
 
-                disp('----------------------------------');
-                disp('Enter SP');
-                disp('|');
-                disp(['P ' num2str(numPkt)]);
+%                 disp('----------------------------------');
+%                 disp('Enter SP');
+%                 disp('|');
+%                 disp(['P ' num2str(numPkt)]);
                 
                 % Pick the next sampled rate in Sample table
                 previndx = previndx+1;
@@ -644,16 +677,16 @@ for numPkt = 1:numPackets
                 %Check if the Samped rate indices are exceeded
                 if previndx == 80
                     previndx = 80;
-                    disp(['Index of sample table:' num2str(previndx)]);
+%                     disp(['Index of sample table:' num2str(previndx)]);
                 elseif previndx > 80
                     previndx = 1;
-                    disp(['Next index of sample table:' num2str(previndx)]);
+%                     disp(['Next index of sample table:' num2str(previndx)]);
                 end
                 
                 % Select sampled rate
                 sprate = ST.sampleTable(previndx);
-                disp(['Next index of sample table:' num2str(previndx)]);
-                disp(['Sampled Rate:' num2str(sprate)]);
+%                 disp(['Next index of sample table:' num2str(previndx)]);
+%                 disp(['Sampled Rate:' num2str(sprate)]);
                 
                 Srates(numPkt) = sprate; % Selected sampled rates
                 
@@ -665,32 +698,32 @@ for numPkt = 1:numPackets
                     if (sprate==mcs)
                         row = temp;
                         
-                        disp('1st condition works' );
+%                         disp('1st condition works' );
                         
                         % Condition - 1, sampled rate not part of MRR
                         if (ST.sampleTable(previndx)== rankrate.MRR(1))
                             notMRR = false;
-                            disp(['SR is part of MRR chain BTP: ' num2str(notMRR)]);
+%                             disp(['SR is part of MRR chain BTP: ' num2str(notMRR)]);
                         elseif (ST.sampleTable(previndx)== rankrate.MRR(2))
                             notMRR = false;
-                            disp(['SR is part of MRR chain NBTP: ' num2str(notMRR)] );
+%                             disp(['SR is part of MRR chain NBTP: ' num2str(notMRR)] );
                         elseif (ST.sampleTable(previndx)== rankrate.MRR(3))
                             notMRR = false;
-                            disp(['SR is part of MRR chain BPr: ' num2str(notMRR)] );
+%                             disp(['SR is part of MRR chain BPr: ' num2str(notMRR)] );
                         else
                             notMRR = true;
-                            disp(['SR is not part of MRR chain :' num2str(notMRR)] );
+%                             disp(['SR is not part of MRR chain :' num2str(notMRR)] );
                         end  % Condition - 1 ends
                         
                         %-----------------------------------------------------------------------------%
                         numPkt1 = numPkt-1;
                         if (EWMAprob(row,numPkt1) <= 95)
-                            disp('2nd condition works' );
+%                             disp('2nd condition works' );
                             lowProb = true;
-                            disp(['EWMAprob of sampled rate is below 95: ' num2str(EWMAprob(row,numPkt1))] );
+%                             disp(['EWMAprob of sampled rate is below 95: ' num2str(EWMAprob(row,numPkt1))] );
                         else
                             lowProb = false;
-                            disp(['EWMAprob of sampled rate is above 95: ' num2str(EWMAprob(row,numPkt1))] );
+%                             disp(['EWMAprob of sampled rate is above 95: ' num2str(EWMAprob(row,numPkt1))] );
                         end
                         
                         %------------------------------------------------------------------------------%
@@ -700,33 +733,33 @@ for numPkt = 1:numPackets
                             
                             % check if condition - 3 works
                             if ((sprate > rankrate.NextBestTP))
-                                disp('Third condition works' );
-                                disp('TP of Sampled rate > NBTP');
+%                                 disp('Third condition works' );
+%                                 disp('TP of Sampled rate > NBTP');
                                 rate = ST.sampleTable(previndx);
                                 updateSP = rate;
                                 SPSraa(numPkt) = updateSP; % Successful sampled rates
                                 RCP = true;
                                 SRupdate = true;
-                                disp(['Switch to NSP:' num2str(RCP)]);
+%                                 disp(['Switch to NSP:' num2str(RCP)]);
                                 
                                 break;
                             else
                                 % Check if not sampled for long time
                                 if (notsam >= prepkts)
-                                    disp(['But Not sampled continously: ' num2str(notsam)]);
+%                                     disp(['But Not sampled continously: ' num2str(notsam)]);
                                     rate =  ST.sampleTable(previndx);
                                     updateSP = rate;
                                     SPSraa(numPkt) = updateSP;
                                     
-                                    disp(['Sampled rate to be used:' num2str(SPSraa(numPkt))]);
+%                                     disp(['Sampled rate to be used:' num2str(SPSraa(numPkt))]);
                                     SRupdate = true;
                                     RCP = true;
-                                    disp(['Switch to NSP:' num2str(RCP)]);
-                                    disp('notsam >  20');
+%                                     disp(['Switch to NSP:' num2str(RCP)]);
+%                                     disp('notsam >  20');
                                     notsam = 0;
                                 else
-                                    disp('Third condition is unsatisfied' );
-                                    disp(['Update Previous index and use BestTP: ' num2str(previndx)]);
+%                                     disp('Third condition is unsatisfied' );
+%                                     disp(['Update Previous index and use BestTP: ' num2str(previndx)]);
                                     notSamp(row,numPkt) = 1;
                                     notsam = sum(notSamp(row,:));
                                     rate = SPMRR;
@@ -736,7 +769,7 @@ for numPkt = 1:numPackets
                                 
                             end
                         else % Conditions are not satisfied, therefore checking if it is not used for long duration
-                            disp('SAMPLE RATE DOES NOT SATISY ANY CONDITIONS');
+%                             disp('SAMPLE RATE DOES NOT SATISY ANY CONDITIONS');
                             rate = SPMRR;
                             SPFraa(numPkt) = rate;
                             SRupdate = false;
@@ -747,7 +780,7 @@ for numPkt = 1:numPackets
                 % Use the selected rate
                 Sp = TxRxchain(rate,snr,tgnChannel,cfgHT);
                 RAA(numPkt) = Sp.RAA;
-                disp(['TxRx chain MCS to verify :' num2str(Sp.RAA)]);
+%                 disp(['TxRx chain MCS to verify :' num2str(Sp.RAA)]);
                 
                 % Calculate packet error rate (PER)
                 if isempty(Sp.RxPSDU)
@@ -764,7 +797,7 @@ for numPkt = 1:numPackets
                 RAA(numPkt) = rate;
                 
                 if any(nbiterr(numPkt))
-                    disp(['Unsucessfull MRR:' num2str(numPkt)]);
+%                     disp(['Unsucessfull MRR:' num2str(numPkt)]);
                     
                     for temp = 1:8
                         mcs = temp-1;
@@ -776,17 +809,17 @@ for numPkt = 1:numPackets
                                 C1 = C1+1;
                                 C1txntime = C1 * MRRtxtime;
                                 
-                                disp(['tx1:' num2str(MRRtxtime)]);
-                                disp(['C1:' num2str(C1txntime)]);
+%                                 disp(['tx1:' num2str(MRRtxtime)]);
+%                                 disp(['C1:' num2str(C1txntime)]);
                                 
                                 if C1txntime >= 0.004
                                     SPMRR = rankrate.NextBestTP;
-                                    disp(['Best TP failed so NextBestTP:' num2str(SPMRR)]);
+%                                     disp(['Best TP failed so NextBestTP:' num2str(SPMRR)]);
                                     rate = SPMRR;
                                     break;
                                 else
                                     SPMRR = rankrate.BestTP;
-                                    disp(['Re-transmit BestTP:' num2str(SPMRR)]);
+%                                     disp(['Re-transmit BestTP:' num2str(SPMRR)]);
                                     rate = SPMRR;
                                     break;
                                 end
@@ -797,17 +830,17 @@ for numPkt = 1:numPackets
                                 C2 = C2+1;
                                 C2txntime = C2 * MRRtxtime;
                                 
-                                disp(['tx2:' num2str(MRRtxtime)]);
-                                disp(['C2:' num2str(C2txntime)]);
+%                                 disp(['tx2:' num2str(MRRtxtime)]);
+%                                 disp(['C2:' num2str(C2txntime)]);
                                 
                                 if C2txntime >= 0.004
                                     SPMRR = rankrate.BestProb;
-                                    disp(['NextBestTP failed so BestProb:' num2str(SPMRR)]);
+%                                     disp(['NextBestTP failed so BestProb:' num2str(SPMRR)]);
                                     rate = SPMRR;
                                     break;
                                 else
                                     SPMRR = rankrate.NextBestTP;
-                                    disp(['Re-transmit NextBestTP:' num2str(SPMRR)]);
+%                                     disp(['Re-transmit NextBestTP:' num2str(SPMRR)]);
                                     rate = SPMRR;
                                     break;
                                 end
@@ -818,17 +851,17 @@ for numPkt = 1:numPackets
                                 C3 = C3+1;
                                 C3txntime = C3 * MRRtxtime;
                                 
-                                disp(['tx3:' num2str(MRRtxtime)]);
-                                disp(['C3:' num2str(C3txntime)]);
+%                                 disp(['tx3:' num2str(MRRtxtime)]);
+%                                 disp(['C3:' num2str(C3txntime)]);
                                 
                                 if C3txntime >= 0.004
                                     SPMRR = R1;
-                                    disp(['BestProb failed so Lowest rate:' num2str(SPMRR)]);
+%                                     disp(['BestProb failed so Lowest rate:' num2str(SPMRR)]);
                                     rate = SPMRR;
                                     break;
                                 else
                                     SPMRR = rankrate.BestProb;
-                                    disp(['Re-transmit BestProb:' num2str(SPMRR)]);
+%                                     disp(['Re-transmit BestProb:' num2str(SPMRR)]);
                                     rate = SPMRR;
                                     break;
                                 end
@@ -836,7 +869,7 @@ for numPkt = 1:numPackets
                         end
                     end
                 else
-                    disp(['sucessfull SP:' num2str(numPkt)]);
+%                     disp(['sucessfull SP:' num2str(numPkt)]);
                     rate = sprate;
                     C1 = 0;
                     C2 = 0;
@@ -888,11 +921,11 @@ for numPkt = 1:numPackets
                             EWMA(numPkt) = NaN;
                         end
                         
-                        disp(['tempProb:' num2str(tempProb(row,numPkt))]);
-                        disp(['tppmcs:' num2str(tppmcs(row,numPkt))]);
-                        disp(['EWMAprob:' num2str(EWMAprob(row,numPkt))]);
-                        disp(['txntime:' num2str(txntime(numPkt))]);
-                        disp(['Previous index of samp table:' num2str(previndx)]);
+%                         disp(['tempProb:' num2str(tempProb(row,numPkt))]);
+%                         disp(['tppmcs:' num2str(tppmcs(row,numPkt))]);
+%                         disp(['EWMAprob:' num2str(EWMAprob(row,numPkt))]);
+%                         disp(['txntime:' num2str(txntime(numPkt))]);
+%                         disp(['Previous index of samp table:' num2str(previndx)]);
                         
                         % Select BestTP as the next MCS for NSP
                         rate = rankrate.BestTP;
@@ -919,7 +952,7 @@ for numPkt = 1:numPackets
                             mrrUpdate(numPkt) = 8;
                             SRatescol = SRatescol + 1;
                             MRRtxntime = sum(txntime);
-                            disp(['MRRtxntime' num2str(MRRtxntime)]);
+%                             disp(['MRRtxntime' num2str(MRRtxntime)]);
                             totaltxtime = totaltxtime+intervalTime;
                             rankrate = ArrangeMCS(Maxtps,tp);
                             SRates(:,SRatescol) = rankrate.MRR;
@@ -931,7 +964,7 @@ for numPkt = 1:numPackets
     end
 end
 %% Display and Plot Simulation Results
-% This example plots the variation of MCS, SNR, BER, and data throughput over 
+% This example plots the variation of MCS, SNR, PER, and data throughput over 
 % the duration of the simulation.
 %% 
 % # The MCS used to transmit each packet is plotted. When compared to the estimated 
@@ -950,17 +983,15 @@ disp(['Overall data rate: ' num2str(8*cfgHT.PSDULength*(numPackets-numel(find(be
 disp(['Overall packet error rate: ' num2str(numel(find(ber))/numPackets)]);
 disp(['Total Transmission time: ' num2str(sum(txntime))]);
 
-
 plotResults(plotNSP,Srates,SPSraa,numPackets,snrWalk,ber,packetLength,RAA,cfgHT,bitError,mrrUpdate);
 
 rng(s);
-
 %% Conclusion and Further Exploration
 % This example uses a Open-loop rate control scheme.
 % 
 % In this example the variation in MCS over time is due to FSR and is adapted 
-% by the alternate Non-sampling period and Sampling period, which uses MRR table 
-% and sampled rates.
+% by the alternate _Non-sampling period_ and _Sampling period_, which uses MRR 
+% table and sampled rates.
 % 
 % Try setting the |displayConstellation| to true in order to plot the equalized 
 % symbols per received packet, you can see the modulation scheme changing over 
@@ -1115,16 +1146,16 @@ for temp = 1:8
     
     if NewMaxtpsDESC(1) == Maxtps(temp)
         MaxTP = temp-1;
-        disp(['MaxTP:' num2str(MaxTP)]);
+%         disp(['MaxTP:' num2str(MaxTP)]);
     elseif NewMaxtpsDESC(2) == Maxtps(temp)
         MaxTP2 = temp-1;
-        disp(['NextBestTP:' num2str(MaxTP2)]);
+%         disp(['NextBestTP:' num2str(MaxTP2)]);
     end
     
     m = ~isnan(EWMA);
     k = find(m,1,'last');
     MaxPROB = EWMA(k);
-    disp(['MaxPROB:' num2str(MaxPROB)]);
+%     disp(['MaxPROB:' num2str(MaxPROB)]);
     
 end
 
@@ -1254,14 +1285,16 @@ chain = struct( ...
 
 end
 %% 
-% _Copyright 2021-2022, The IISc team:_ 
+% _Copyright 2021-2022,_ The research team comprising of the members from Indian 
+% Institute of Science (IISc), listed below, has implemented the Minstrel-HT Rate 
+% adaptation algorithm in MATLAB.
 % 
 % *Researcher and Developer:* Shyam Sundar D G  <shyamsdg01@gmail.com shyamsdg01@gmail.com>
 % 
-% *NS3 Collaborator:* Rushabha B <http://rush.balaji@gmail.com rush.balaji@gmail.com>
+% *NS3 Collaborator:* Rushabha B <http://rushab.balaji@gmail.com rushab.balaji@gmail.com>
 % 
-% *Technical Advisors:* _Neeleshb Mehta_ <nbmehta@iisc.ac.in _nbmehta@iisc.ac.in_> 
-% _and_ Chandramani Singh <chandra@iisc.ac.in chandra@iisc.ac.in>
+% *Technical Advisors:* Prof.Neelesh B Mehta <nbmehta@iisc.ac.in nbmehta@iisc.ac.in> 
+% and Dr.Chandramani Singh <chandra@iisc.ac.in chandra@iisc.ac.in>
 % 
 % _The authors would like to thank *Aerospace Network Research Consortium(*_<http://www.anrc.us/ 
-% ANRC>_*),*_ <https://iisc.ac.in/ IISc> _for thier support._
+% _ANRC_>_*),*_ <https://iisc.ac.in/ _IISc_> _for thier support._

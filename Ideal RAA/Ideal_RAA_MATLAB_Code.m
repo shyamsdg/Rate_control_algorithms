@@ -579,12 +579,16 @@ function x = plotResults(ber,packetLength,snrMeasured,MCS,cfgVHT,bitError,baseSN
       'movDataRate',     movDataRate);  
 end
 %% 
-% _Copyright 2021-2022, The IISc team:_ 
+% _Copyright 2021-2022,_ The research team comprising of the members from Indian 
+% Institute of Science (IISc), listed below, has implemented the Minstrel-HT Rate 
+% adaptation algorithm in MATLAB.
 % 
 % *Researcher and Developer:* Shyam Sundar D G  <shyamsdg01@gmail.com shyamsdg01@gmail.com>
 % 
-% *Technical Advisors:* _Neeleshb Mehta_ <nbmehta@iisc.ac.in _nbmehta@iisc.ac.in_> 
-% _and_ Chandramani Singh <chandra@iisc.ac.in chandra@iisc.ac.in>
+% *NS3 Collaborator:* Rushabha B <http://rushab.balaji@gmail.com rushab.balaji@gmail.com>
+% 
+% *Technical Advisors:* Prof.Neelesh B Mehta <nbmehta@iisc.ac.in nbmehta@iisc.ac.in> 
+% and Dr.Chandramani Singh <chandra@iisc.ac.in chandra@iisc.ac.in>
 % 
 % _The authors would like to thank *Aerospace Network Research Consortium(*_<http://www.anrc.us/ 
-% ANRC>_*),*_ <https://iisc.ac.in/ IISc> _for thier support._
+% _ANRC_>_*),*_ <https://iisc.ac.in/ _IISc_> _for thier support._
